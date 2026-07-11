@@ -1,49 +1,98 @@
+/* Core Theme Variables - Dark-Light Purple Cyberpunk Theme */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #07050a;
+  --foreground: #f1eef7;
+  --panel-bg: rgba(20, 15, 30, 0.6);
+  --panel-border: rgba(182, 36, 255, 0.15);
+  
+  --purple-neon: #b624ff;
+  --purple-glow: rgba(182, 36, 255, 0.3);
+  
+  --purple-light: #e38eff;
+  --purple-light-glow: rgba(227, 142, 255, 0.35);
+  
+  --accent-pink: #ff22b0;
+  --accent-pink-glow: rgba(255, 34, 176, 0.3);
+  
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
+/* Global resets */
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+html {
+  height: 100%;
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+body {
+  min-height: 100%;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+  background-image: 
+    radial-gradient(at 50% 0%, rgba(182, 36, 255, 0.15) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(255, 34, 176, 0.08) 0px, transparent 50%),
+    linear-gradient(rgba(182, 36, 255, 0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(182, 36, 255, 0.01) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Typography styles */
+h1, h2, h3, h4, h5, h6 {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Interactive elements */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--purple-light);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(182, 36, 255, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(182, 36, 255, 0.3);
+}
+
+/* Rainbow Screen Flash animation for Game Over */
+@keyframes rainbowFlash {
+  0% { background-color: rgba(255, 255, 255, 0.7); }
+  14% { background-color: rgba(0, 114, 255, 0.6); }
+  28% { background-color: rgba(0, 242, 254, 0.6); }
+  42% { background-color: rgba(57, 255, 20, 0.6); }
+  56% { background-color: rgba(255, 255, 0, 0.6); }
+  70% { background-color: rgba(255, 51, 102, 0.6); }
+  84% { background-color: rgba(189, 0, 255, 0.6); }
+  100% { background-color: rgba(255, 255, 255, 0.7); }
 }
