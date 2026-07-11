@@ -164,8 +164,8 @@
 
 /* Grid Cells with Cyberpunk Glass look */
 .cell {
-  width: 32px;
-  height: 32px;
+  width: var(--cell-size, 32px);
+  height: var(--cell-size, 32px);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
   border: 1px solid rgba(182, 36, 255, 0.1);
   border-bottom: 2px solid rgba(0, 0, 0, 0.5);
@@ -175,7 +175,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: calc(var(--cell-size, 32px) * 0.5);
   font-weight: 800;
   font-family: var(--font-geist-mono), monospace;
   transition: all 0.15s ease;
@@ -337,13 +337,93 @@
 /* Responsiveness adjustments for mobile */
 @media (max-width: 600px) {
   .cell {
-    width: 36px;
-    height: 36px;
-    font-size: 17px;
+    /* Respect cell size variable from JS calculation */
+    width: var(--cell-size);
+    height: var(--cell-size);
+    font-size: calc(var(--cell-size) * 0.5);
   }
 }
 @media (min-width: 601px) {
   .mobileActions {
     display: none;
   }
+}
+
+/* Zoom Slider Styles */
+.zoomControlRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(182, 36, 255, 0.2);
+  border-radius: 10px;
+  padding: 8px 16px;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+
+.zoomLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zoomSlider {
+  flex: 1;
+  max-width: 180px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  cursor: pointer;
+}
+
+.zoomSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--purple-light);
+  box-shadow: 0 0 8px var(--purple-light-glow);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.zoomSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.zoomSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--purple-light);
+  box-shadow: 0 0 8px var(--purple-light-glow);
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s;
+}
+
+.zoomSlider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+.zoomVal {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--purple-light);
+  min-width: 40px;
+  text-align: right;
+  text-shadow: 0 0 6px var(--purple-light-glow);
 }

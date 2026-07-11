@@ -104,11 +104,50 @@ export default function Minesweeper({ user, onScoreSubmitted, onAuthRequired }: 
   const [submittingScore, setSubmittingScore] = useState(false);
   const [scoreMessage, setScoreMessage] = useState("");
 
+  // Zoom and responsive scaling states
+  const [zoom, setZoom] = useState(1.0);
+  const [windowWidth, setWindowWidth] = useState(1000);
+
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTouchActiveRef = useRef(false);
 
   const { rows, cols, mines } = CONFIGS[difficulty];
+
+  // Monitor screen resizing for active cell scaling recalculations
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const initTimer = setTimeout(() => {
+      setWindowWidth(window.innerWidth);
+    }, 0);
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(initTimer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  // Compute dynamic cell size based on screen size, current difficulty grid, and active zoom slider
+  const getCellSize = () => {
+    let base = 32;
+    const isMobile = windowWidth <= 600;
+    if (isMobile) {
+      if (difficulty === "hard") base = 18;
+      else if (difficulty === "medium") base = 24;
+      else base = 32;
+    } else {
+      if (difficulty === "hard") base = 26;
+      else if (difficulty === "medium") base = 28;
+      else base = 32;
+    }
+    return Math.round(base * zoom);
+  };
+  const cellSize = getCellSize();
 
   // Initialize the Audio Settings asynchronously on mount to prevent SSR mismatch and sync-setState warnings
   useEffect(() => {
@@ -496,6 +535,22 @@ export default function Minesweeper({ user, onScoreSubmitted, onAuthRequired }: 
         </div>
       </div>
 
+      {/* Zoom Control Slider */}
+      <div className={styles.zoomControlRow}>
+        <span className={styles.zoomLabel}>🔍 Grid Zoom:</span>
+        <input
+          type="range"
+          min="0.6"
+          max="1.6"
+          step="0.05"
+          value={zoom}
+          onChange={(e) => setZoom(parseFloat(e.target.value))}
+          className={styles.zoomSlider}
+          aria-label="Adjust board cell size"
+        />
+        <span className={styles.zoomVal}>{Math.round(zoom * 100)}%</span>
+      </div>
+
       {/* Retro HUD */}
       <div className={styles.hudContainer}>
         <div className={styles.hudDisplay}>{formatNumber(minesLeft)}</div>
@@ -531,7 +586,8 @@ export default function Minesweeper({ user, onScoreSubmitted, onAuthRequired }: 
           className={styles.board}
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          }}
+            "--cell-size": `${cellSize}px`,
+          } as React.CSSProperties}
         >
           {board.map((rowCells, rIndex) =>
             rowCells.map((cell, cIndex) => {
