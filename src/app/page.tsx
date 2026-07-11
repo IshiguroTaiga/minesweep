@@ -295,8 +295,8 @@ export default function Home() {
 
       {/* Footer Info */}
       <footer className={styles.footer}>
-        <p>Built with Next.js & Web Audio API. Hosted on Vercel.</p>
-        <p className={styles.mobileInstruction}>Mobile tip: Long-press to flag cells, or toggle Flag Mode.</p>
+        <p>Built by ur boi Ishi.</p>
+        <p className={styles.mobileInstruction}>Mobile tip: Long press to flag cells, or toggle Flag Mode.</p>
       </footer>
 
       {/* Auth Popup Modal */}
