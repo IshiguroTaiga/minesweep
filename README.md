@@ -1,4 +1,4 @@
-# 💣 Neon Minesweeper
+# Minesweeper :>
 
 A modern, responsive, full-stack web-based Minesweeper game built with a glassmorphic cyberpunk aesthetic, in-browser procedural audio synthesis, secure user authentication, and real-time difficulty-specific leaderboards.
 
