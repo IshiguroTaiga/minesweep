@@ -67,14 +67,26 @@ const INITIAL_STATUS: LiveStatus = {
   announcementTimestamp: 0,
 };
 
+// In-Memory Database Fallback (used when file system is read-only and KV is not linked)
+let memoryDb: DbSchema = {
+  users: {},
+  scores: { easy: [], medium: [], hard: [] },
+  liveStatus: INITIAL_STATUS
+};
+
 // Local File DB Helper
 function readLocalDb(): DbSchema {
-  if (!fs.existsSync(DB_FILE)) {
-    const initial: DbSchema = { users: {}, scores: { easy: [], medium: [], hard: [] }, liveStatus: INITIAL_STATUS };
-    fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2), "utf-8");
-    return initial;
-  }
   try {
+    if (!fs.existsSync(DB_FILE)) {
+      const initial: DbSchema = { users: {}, scores: { easy: [], medium: [], hard: [] }, liveStatus: INITIAL_STATUS };
+      try {
+        fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2), "utf-8");
+      } catch (writeErr) {
+        // If file system is read-only (like Vercel serverless), print warning and return initial memory structure
+        console.warn("Local file DB write failed (likely read-only filesystem). Falling back to in-memory:", writeErr);
+      }
+      return initial;
+    }
     const data = fs.readFileSync(DB_FILE, "utf-8");
     const parsed = JSON.parse(data);
     
@@ -84,16 +96,19 @@ function readLocalDb(): DbSchema {
     }
     return parsed;
   } catch (error) {
-    console.error("Error reading local db, resetting it", error);
-    const initial: DbSchema = { users: {}, scores: { easy: [], medium: [], hard: [] }, liveStatus: INITIAL_STATUS };
-    fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2), "utf-8");
-    return initial;
+    console.warn("Local file DB read/write failed. Falling back to in-memory database:", error);
+    return memoryDb;
   }
 }
 
 // Safe write utility to make sure the data folder/file exists
 function writeLocalDb(data: DbSchema) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
+  } catch (error) {
+    console.warn("Local file DB write failed (likely read-only filesystem). Saving to server memory:", error);
+    memoryDb = data;
+  }
 }
 
 // Core DB operations
@@ -105,7 +120,7 @@ export async function getUser(username: string): Promise<User | null> {
       if (!userData) return null;
       return typeof userData === "string" ? JSON.parse(userData) : userData;
     } catch (e) {
-      console.error("KV error in getUser, falling back to local:", e);
+      console.error("KV error in getUser, falling back to local/memory:", e);
       const db = readLocalDb();
       return db.users[normUsername] || null;
     }
@@ -121,7 +136,7 @@ export async function createUser(user: User): Promise<void> {
     try {
       await kvFetch(["SET", `user:${normUsername}`, JSON.stringify(user)]);
     } catch (e) {
-      console.error("KV error in createUser, falling back to local:", e);
+      console.error("KV error in createUser, falling back to local/memory:", e);
       const db = readLocalDb();
       db.users[normUsername] = user;
       writeLocalDb(db);
@@ -141,7 +156,7 @@ export async function getScores(difficulty: "easy" | "medium" | "hard"): Promise
       const list = typeof scoresData === "string" ? JSON.parse(scoresData) : scoresData;
       return Array.isArray(list) ? list : [];
     } catch (e) {
-      console.error("KV error in getScores, falling back to local:", e);
+      console.error("KV error in getScores, falling back to local/memory:", e);
       const db = readLocalDb();
       return db.scores[difficulty] || [];
     }
@@ -161,7 +176,7 @@ export async function addScore(score: Score): Promise<void> {
       const top100 = current.slice(0, 100);
       await kvFetch(["SET", `scores:${difficulty}`, JSON.stringify(top100)]);
     } catch (e) {
-      console.error("KV error in addScore, falling back to local:", e);
+      console.error("KV error in addScore, falling back to local/memory:", e);
       const db = readLocalDb();
       if (!db.scores[difficulty]) {
         db.scores[difficulty] = [];
@@ -191,7 +206,7 @@ export async function getLiveStatus(): Promise<LiveStatus> {
       if (!statusData) return INITIAL_STATUS;
       return typeof statusData === "string" ? JSON.parse(statusData) : statusData;
     } catch (e) {
-      console.error("KV error in getLiveStatus, falling back to local:", e);
+      console.error("KV error in getLiveStatus, falling back to local/memory:", e);
       const db = readLocalDb();
       return db.liveStatus || INITIAL_STATUS;
     }
@@ -208,7 +223,7 @@ export async function updateLiveStatus(newStatus: Partial<LiveStatus>): Promise<
       const updated = { ...current, ...newStatus };
       await kvFetch(["SET", "dev:live-status", JSON.stringify(updated)]);
     } catch (e) {
-      console.error("KV error in updateLiveStatus, falling back to local:", e);
+      console.error("KV error in updateLiveStatus, falling back to local/memory:", e);
       const db = readLocalDb();
       db.liveStatus = { ...db.liveStatus, ...newStatus };
       writeLocalDb(db);
