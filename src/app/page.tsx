@@ -71,10 +71,10 @@ export default function Home() {
       if (annTimeout) clearTimeout(annTimeout);
       setActiveAnnouncement(text);
       
-      // Auto-dismiss after 6 seconds (slides back up)
+      // Auto-dismiss after 10 seconds (slides back up)
       annTimeout = setTimeout(() => {
         setActiveAnnouncement(null);
-      }, 6000);
+      }, 10000);
     };
 
     const pollLiveStatus = async () => {
@@ -91,7 +91,7 @@ export default function Home() {
             lastAnnTime = announcementTimestamp;
             isFirstFetch = false;
             if (announcement) {
-              setActiveAnnouncement(announcement);
+              showAnnouncement(announcement);
             }
             return;
           }
@@ -192,7 +192,7 @@ export default function Home() {
       <header className={styles.header}>
         <div className={styles.logoContainer}>
           <span className={styles.gameIcon}>💣</span>
-          <h1 className={styles.logoText}>NEON MINESWEEPER</h1>
+          <h1 className={styles.logoText}>MINESWEEPER</h1>
         </div>
 
         <div className={styles.userSection}>
